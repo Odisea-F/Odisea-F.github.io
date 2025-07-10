@@ -126,7 +126,7 @@
         // --- Lógica del Oráculo con IA (El "Alma" del Chatbot) ---
         async function getOraculoAIResponse(pregunta) {
             // Si la API Key está vacía o es el texto de ejemplo, muestra un error amigable.
-            if (apiKey === "AIzaSyAFFZhoRGCbi9YvLuOEzSE_9wM8a_GzzNk" || !apiKey) {
+            if (apiKey === "AIzaSyChpTitwCZXwb1SZK9sJ3hY9972FDxFZG8" || !apiKey) {
                 return "Navegante, el Oráculo necesita su llave para consultar los cielos. Parece que la API Key no ha sido configurada en el código.";
             }
 
@@ -226,7 +226,7 @@
 
         window.addEventListener('load', () => {
             setTimeout(() => {
-                addMessage("¡Bienvenido, navegante! Soy el Oráculo de Odisea. Hazme una pregunta sobre tu travesía financiera.", 'oraculo');
+                addMessage("¡Te doy la bienvenida, navegante! Soy el Oráculo de Odisea. Hazme una pregunta sobre tu travesía financiera.", 'oraculo');
             }, 500);
         });
     </script>
