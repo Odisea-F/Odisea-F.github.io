@@ -126,7 +126,7 @@
         // --- ¡IMPORTANTE! Pega tu API Key de Google AI Studio aquí ---
         // DEBES REEMPLAZAR "AIzaSyAFFZhoRGCbi9YvLuOEzSE_9wM8a_GzzNk" con TU CLAVE API REAL.
         // Si usas esta clave de ejemplo, la conexión a la IA fallará.
-        const apiKey = "TU_API_KEY_REAL_AQUÍ"; // <<< ¡REEMPLAZA ESTO CON TU API KEY REAL!
+        const apiKey = "AIzaSyAFFZhoRGCbi9YvLuOEzSE_9wM8a_GzzNk"; // <<< ¡REEMPLAZA ESTO CON TU API KEY REAL!
 
         // --- Lógica del Oráculo con IA (El "Alma" del Chatbot) ---
         async function getOraculoAIResponse(pregunta) {
@@ -134,7 +134,7 @@
 
             // Si la API Key está vacía o es el texto de ejemplo, muestra un error amigable.
             // CORRECCIÓN: 'apikey' cambiado a 'apiKey'
-            if (apiKey === "TU_API_KEY_REAL_AQUÍ" || !apiKey) { // Usar aquí también TU_API_KEY_REAL_AQUÍ
+            if (apiKey === "AIzaSyAFFZhoRGCbi9YvLuOEzSE_9wM8a_GzzNk" || !apiKey) { // Usar aquí también TU_API_KEY_REAL_AQUÍ
                 console.error("Error: API Key no configurada o es la clave de ejemplo.");
                 return "Navegante, el Oráculo necesita su llave para consultar los cielos. Parece que la API Key no ha sido configurada correctamente en el código.";
             }
