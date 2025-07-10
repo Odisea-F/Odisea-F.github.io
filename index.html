@@ -126,7 +126,7 @@
         // --- Lógica del Oráculo con IA (El "Alma" del Chatbot) ---
         async function getOraculoAIResponse(pregunta) {
             // Si la API Key está vacía o es el texto de ejemplo, muestra un error amigable.
-            if (apiKey === "AIzaSyChpTitwCZXwb1SZK9sJ3hY9972FDxFZG8" || !apiKey) {
+            if (apiKey === " " || !apiKey) {
                 return "Navegante, el Oráculo necesita su llave para consultar los cielos. Parece que la API Key no ha sido configurada en el código.";
             }
 
