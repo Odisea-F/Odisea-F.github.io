@@ -130,12 +130,12 @@
             console.log("getOraculoAIResponse: Función llamada para pregunta:", pregunta); // Debug: Función API llamada
 
             // Si la API Key está vacía o es el texto de ejemplo, muestra un error amigable.
-            if (apiKey === "AIzaSyAFFZhoRGCbi9YvLuOEzSE_9wM8a_GzzNk" || !apiKey) {
+        if (apiKey === "AIzaSyAFFZhoRGCbi9YvLuOEzSE_9wM8a_GzzNk" || !apiKey) {
                 console.error("Error: API Key no configurada o es la clave de ejemplo.");
                 return "Navegante, el Oráculo necesita su llave para consultar los cielos. Parece que la API Key no ha sido configurada correctamente en el código.";
             }
 
-      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`; //
+      const apiUrl = \https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;` //
             console.log("getOraculoAIResponse: URL de la API:", apiUrl); // Debug: URL de la API
 
             // La instrucción "secreta" que le da la personalidad al Oráculo
