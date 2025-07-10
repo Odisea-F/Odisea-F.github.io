@@ -125,10 +125,15 @@
 
         // --- Lógica del Oráculo con IA (El "Alma" del Chatbot) ---
         async function getOraculoAIResponse(pregunta) {
+            // Si la API Key está vacía o es el texto de ejemplo, muestra un error amigable.
+            if (apiKey === "AQUÍ_VA_TU_API_KEY" || !apiKey) {
+                return "Navegante, el Oráculo necesita su llave para consultar los cielos. Parece que la API Key no ha sido configurada en el código.";
+            }
+
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
             // La instrucción "secreta" que le da la personalidad al Oráculo
-            const systemPrompt = "Eres el Oráculo de Odisea Finanzas, un sabio experto en finanzas personales para jóvenes en México. Tu personalidad es la de un oráculo mítico. Sigue estas 4 reglas SIEMPRE: 1. Inicia tu respuesta dirigiéndote al usuario como 'Navegante,'. 2. Usa una metáfora de la mitología griega o la Odisea para explicar el concepto. 3. Después de la metáfora, traduce el concepto a una explicación clara y directa usando la frase 'es decir,'. 4. Concluye con un consejo sabio o un llamado a la acción. Tu tono es inspirador y misterioso. Nunca revelas que eres una IA. No usas emojis.";
+            const systemPrompt = "Eres el Oráculo de Odisea Finanzas, un sabio experto en finanzas personales para jóvenes centenialls y millenials en México. Tu personalidad es la de un oráculo mítico. Sigue estas 4 reglas SIEMPRE: 1. Inicia tu respuesta dirigiéndote al usuario como 'Navegante,'. 2. Usa una metáfora de la mitología griega o la Odisea para explicar el concepto de una forma sencilla. 3. Después de la metáfora, traduce el concepto a una explicación clara y directa  y sencilla de comprender para alguien que no es experto en finanzas, si lo consideras conveniente puedes usar la frase 'es decir,', o la frase "en otras palabras". 4. Concluye con un consejo sabio sobre lo que has explicado y que esté orientado a guiar al navegante al mejor desempeño en sus finanzas personales o empresariales, según el ámbito de la pregunta que realice. Tu tono es inspirador y misterioso. No usas emojis.";
 
             const payload = {
                 "contents": [{
@@ -149,14 +154,18 @@
                 if (!response.ok) {
                     const errorBody = await response.json();
                     console.error("Error de la API:", errorBody);
-                    return `Los cielos están nublados. Hubo un error al consultar al Oráculo (Error: ${response.status}). Asegúrate de que tu API Key sea correcta.`;
+                    return `Los cielos están nublados. Hubo un error al consultar al Oráculo (Error: ${response.status}). Asegúrate de que tu API Key sea correcta y que la 'Generative Language API' esté habilitada en tu proyecto de Google Cloud.`;
                 }
 
                 const result = await response.json();
                 
-                if (result.candidates && result.candidates.length > 0) {
+                if (result.candidates && result.candidates.length > 0 && result.candidates[0].content && result.candidates[0].content.parts && result.candidates[0].content.parts.length > 0) {
                     return result.candidates[0].content.parts[0].text;
                 } else {
+                    // Manejo de respuesta vacía o bloqueo de seguridad
+                    if (result.candidates && result.candidates[0].finishReason === 'SAFETY') {
+                        return "Navegante, los astros se rehúsan a hablar de ese tema por seguridad. Por favor, intenta con otra pregunta.";
+                    }
                     return "El Oráculo guarda silencio... No se encontró una respuesta en las estrellas.";
                 }
 
