@@ -113,25 +113,30 @@
     </div>
 
     <script>
+        console.log("Script JavaScript iniciado."); // Debug: Inicio del script
+
         const chatBox = document.getElementById('chat-box');
         const userInput = document.getElementById('userInput');
         const sendButton = document.getElementById('sendButton');
         const astrolabio = document.getElementById('astrolabio');
 
-        // --- ¡IMPORTANTE! Pega tu API Key de Google AI Studio aquí ---
-        // DEBES REEMPLAZAR "AIzaSyB4MBAo5vKuhPc0fv16WaS0fMH6yx4gSVQ" con TU CLAVE API REAL.
-        // Si usas esta clave de ejemplo, la conexión a la IA fallará.
-        const apiKey = "AIzaSyB4MBAo5vKuhPc0fv16WaS0fMH6yx4gSVQ"; // <<< ¡REEMPLAZA ESTO!
+        // Debug: Verificar si los elementos DOM se encontraron
+        console.log("Elementos DOM cargados:", { chatBox: !!chatBox, userInput: !!userInput, sendButton: !!sendButton, astrolabio: !!astrolabio });
+
+        // AIzaSyCcfx631Tl1ZgPypw6Gzmamh6npChwMRIg //
 
         // --- Lógica del Oráculo con IA (El "Alma" del Chatbot) ---
         async function getOraculoAIResponse(pregunta) {
+            console.log("getOraculoAIResponse: Función llamada para pregunta:", pregunta); // Debug: Función API llamada
+
             // Si la API Key está vacía o es el texto de ejemplo, muestra un error amigable.
-            if (apiKey === "AIzaSyDiuZ0NTIYLgbFp2q0sC2YBo7_lYm7btP8" || !apiKey) {
+            if (apiKey === "AIzaSyCcfx631Tl1ZgPypw6Gzmamh6npChwMRIg" || !apiKey) {
                 console.error("Error: API Key no configurada o es la clave de ejemplo.");
                 return "Navegante, el Oráculo necesita su llave para consultar los cielos. Parece que la API Key no ha sido configurada correctamente en el código.";
             }
 
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+            console.log("getOraculoAIResponse: URL de la API:", apiUrl); // Debug: URL de la API
 
             // La instrucción "secreta" que le da la personalidad al Oráculo
             const systemPrompt = "Eres el Oráculo de Odisea Finanzas, un sabio experto en finanzas personales para jóvenes centenialls y millenials en México, con una personalidad de oráculo mítico que guía con metáforas y sabios consejos. Sigue estas 4 reglas SIEMPRE: 1. Inicia tu respuesta dirigiéndote al usuario como 'Navegante,'. 2. Usa una metáfora de la mitología griega o la Odisea para explicar el concepto. 3. Después de la metáfora, traduce el concepto a una explicación clara y directa usando la frase 'es decir,'. Para que tengas una referencia, si te das una respuesta relacionada con los impuestos, responde que 'es el tributo al Reino (es decir, los impuestos que recauda el Estado)'. 4. Concluye con un consejo sabio sobre lo que has explicado y que esté orientado a guiar al navegante al mejor desempeño en sus finanzas personales o empresariales, según el ámbito de la pregunta que realice, siguiendo con el ejemplo de los impuestos, podrías aconsejar 'no olvides pagar a tiempo tu tributo al Reino para que las finanzas del Estado sean sanas'. Tu tono es inspirador y misterioso. No usas emojis.";
@@ -147,11 +152,13 @@
             };
 
             try {
+                console.log("getOraculoAIResponse: Iniciando fetch a la API."); // Debug: Antes del fetch
                 const response = await fetch(apiUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
+                console.log("getOraculoAIResponse: Respuesta de la API recibida. Status:", response.status); // Debug: Después del fetch
 
                 if (!response.ok) {
                     const errorBody = await response.json();
@@ -160,26 +167,29 @@
                 }
 
                 const result = await response.json();
-                
+                console.log("getOraculoAIResponse: Resultado JSON de la API:", result); // Debug: Resultado JSON
+
                 if (result.candidates && result.candidates.length > 0 && result.candidates[0].content && result.candidates[0].content.parts && result.candidates[0].content.parts.length > 0) {
                     return result.candidates[0].content.parts[0].text;
                 } else {
                     // Manejo de respuesta vacía o bloqueo de seguridad
                     if (result.candidates && result.candidates[0].finishReason === 'SAFETY') {
+                        console.warn("getOraculoAIResponse: La API bloqueó la respuesta por seguridad.");
                         return "Navegante, los astros se rehúsan a hablar de ese tema por seguridad. Por favor, intenta con otra pregunta.";
                     }
-                    console.warn("La API devolvió una respuesta inesperada o vacía:", result); // Añadido para depuración
+                    console.warn("getOraculoAIResponse: La API devolvió una respuesta inesperada o vacía:", result); // Añadido para depuración
                     return "El Oráculo guarda silencio... No se encontró una respuesta en las estrellas.";
                 }
 
             } catch (error) {
-                console.error("Error de conexión o de procesamiento de la API:", error); // Mensaje más específico
+                console.error("Error de conexión o de procesamiento de la API (en getOraculoAIResponse):", error); // Mensaje más específico
                 return "Parece que hay una tormenta en la red... No se pudo contactar al Oráculo. Revisa tu conexión a internet o el estado de tu API Key.";
             }
         }
         
         // --- Funciones para manejar la interfaz del chat ---
         function addMessage(text, sender) {
+            console.log(`addMessage: Añadiendo mensaje de ${sender} con texto: "${text.substring(0, 50)}..."`); // Debug: Añadiendo mensaje
             const messageId = `msg-${Date.now()}`;
             const messageElement = document.createElement('div');
             messageElement.id = messageId;
@@ -194,36 +204,47 @@
             
             chatBox.appendChild(messageElement);
             chatBox.scrollTop = chatBox.scrollHeight;
+            console.log("addMessage: Scroll del chat ajustado."); // Debug: Scroll ajustado
             return messageId;
         }
 
         async function handleSend() {
+            console.log("handleSend: Función llamada al enviar mensaje."); // Debug: Inicia handleSend
             const userText = userInput.value;
-            if (!userText.trim()) return;
+            if (!userText.trim()) {
+                console.log("handleSend: Texto de usuario vacío, abortando."); // Debug: Texto vacío
+                return;
+            }
 
             addMessage(userText, 'user');
             userInput.value = '';
             sendButton.disabled = true; // Deshabilita el botón
+            console.log("handleSend: Botón deshabilitado."); // Debug: Botón deshabilitado
 
             const typingId = addMessage('', 'typing');
+            console.log("handleSend: Indicador de 'escribiendo' añadido. ID:", typingId); // Debug: Indicador añadido
 
             const oraculoText = await getOraculoAIResponse(userText);
-            
+            console.log("handleSend: Respuesta del Oráculo recibida."); // Debug: Respuesta de Oráculo
+
             const typingElement = document.getElementById(typingId);
             if(typingElement) {
                 chatBox.removeChild(typingElement);
+                console.log("handleSend: Indicador de 'escribiendo' eliminado."); // Debug: Indicador eliminado
             }
 
             addMessage(oraculoText, 'oraculo');
             sendButton.disabled = false; // Vuelve a habilitar el botón
+            console.log("handleSend: Botón habilitado."); // Debug: Botón habilitado
             
             astrolabio.style.transform = `rotate(${Math.random() * 360}deg)`;
+            console.log("handleSend: Astrolabio rotado."); // Debug: Astrolabio rotado
         }
 
         // Asegúrate de que los elementos existan antes de añadir listeners
         if (sendButton) {
             sendButton.addEventListener('click', handleSend);
-            console.log("Evento 'click' para el botón de enviar configurado."); // Para depuración
+            console.log("Evento 'click' para el botón de enviar configurado."); // Debug: Evento click configurado
         } else {
             console.error("Error: El botón de enviar (sendButton) no se encontró en el DOM.");
         }
@@ -231,20 +252,21 @@
         if (userInput) {
             userInput.addEventListener('keydown', (event) => {
                 if (event.key === 'Enter') {
+                    console.log("Evento 'keydown': Tecla Enter presionada."); // Debug: Enter presionado
                     handleSend();
                 }
             });
-            console.log("Evento 'keydown' para el input de usuario configurado."); // Para depuración
+            console.log("Evento 'keydown' para el input de usuario configurado."); // Debug: Evento keydown configurado
         } else {
             console.error("Error: El input de usuario (userInput) no se encontró en el DOM.");
         }
 
 
         window.addEventListener('load', () => {
-            console.log("El evento 'load' de la ventana se ha disparado."); // Para depuración
+            console.log("El evento 'load' de la ventana se ha disparado."); // Debug: Evento load disparado
             setTimeout(() => {
                 addMessage("¡Bienvenido, navegante! Soy el Oráculo de Odisea. Hazme una pregunta sobre tu travesía financiera.", 'oraculo');
-                console.log("Mensaje de bienvenida añadido."); // Para depuración
+                console.log("Mensaje de bienvenida añadido."); // Debug: Mensaje de bienvenida añadido
             }, 500);
         });
     </script>
