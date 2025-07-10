@@ -135,7 +135,7 @@
                 return "Navegante, el Oráculo necesita su llave para consultar los cielos. Parece que la API Key no ha sido configurada correctamente en el código.";
             }
 
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apikey}`; //
             console.log("getOraculoAIResponse: URL de la API:", apiUrl); // Debug: URL de la API
 
             // La instrucción "secreta" que le da la personalidad al Oráculo
