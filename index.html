@@ -63,11 +63,19 @@
         .typing-indicator span:nth-child(3) {
             animation-delay: 0.4s;
         }
-        @keyframes blink {
+        /* La versión para Chrome, Safari, etc. */
+        @-webkit-keyframes blink {
             0% { opacity: 0.2; }
             20% { opacity: 1; }
             100% { opacity: 0.2; }
         }
+
+        /* La versión estándar */
+        @keyframes blink {
+            0% { opacity: 0.2; }
+            20% { opacity: 1; }
+            100% { opacity: 0.2; }
+        } 
     </style>
 </head>
 <body class="flex flex-col items-center justify-center h-screen text-white p-4">
