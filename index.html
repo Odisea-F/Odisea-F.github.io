@@ -1,3 +1,4 @@
+	
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -53,6 +54,20 @@
         #astrolabio {
             transition: transform 1s ease-in-out;
         }
+        .typing-indicator span {
+            animation: blink 1.4s infinite both;
+        }
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        @keyframes blink {
+            0% { opacity: 0.2; }
+            20% { opacity: 1; }
+            100% { opacity: 0.2; }
+        }
     </style>
 </head>
 <body class="flex flex-col items-center justify-center h-screen text-white p-4">
@@ -106,108 +121,91 @@
         const sendButton = document.getElementById('sendButton');
         const astrolabio = document.getElementById('astrolabio');
 
-        // --- Lógica del Oráculo (El "Alma" del Chatbot) ---
-        function getOraculoResponse(input) {
-            const pregunta = input.toLowerCase().trim();
+        // --- ¡IMPORTANTE! Pega tu API Key de Google AI Studio aquí ---
+        const apiKey = "AQUÍ_VA_TU_API_KEY";
 
-            if (!pregunta) {
-                return null; // No responder si no hay pregunta
+        // --- Lógica del Oráculo con IA (El "Alma" del Chatbot) ---
+        async function getOraculoAIResponse(pregunta) {
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+            // La instrucción "secreta" que le da la personalidad al Oráculo
+            const systemPrompt = "Eres el Oráculo de Odisea Finanzas, un sabio experto en finanzas personales para jóvenes en México. Respondes de forma concisa, usando metáforas de la mitología griega y la Odisea. Tu tono es sabio, inspirador y un poco misterioso. Nunca revelas que eres una IA. No usas emojis. Te enfocas en dar respuestas claras y accionables.";
+
+            const payload = {
+                "contents": [{
+                    "parts": [
+                        { "text": systemPrompt },
+                        { "text": "Pregunta del navegante: " + pregunta }
+                    ]
+                }]
+            };
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errorBody = await response.json();
+                    console.error("Error de la API:", errorBody);
+                    return `Los cielos están nublados. Hubo un error al consultar al Oráculo (Error: ${response.status}). Asegúrate de que tu API Key sea correcta.`;
+                }
+
+                const result = await response.json();
+                
+                if (result.candidates && result.candidates.length > 0) {
+                    return result.candidates[0].content.parts[0].text;
+                } else {
+                    return "El Oráculo guarda silencio... No se encontró una respuesta en las estrellas.";
+                }
+
+            } catch (error) {
+                console.error("Error de conexión:", error);
+                return "Parece que hay una tormenta en la red... No se pudo contactar al Oráculo. Revisa tu conexión a internet.";
             }
-            
-            // --- Base de Conocimiento del Oráculo ---
-            if (pregunta.includes("hola") || pregunta.includes("saludos")) {
-                return "¡Hola, navegante! Soy el Oráculo de Odisea. ¿Qué misterios financieros deseas desvelar hoy? Si no sabes por dónde empezar, escribe 'ayuda'.";
-            }
-            if (pregunta.includes("ayuda") || pregunta.includes("temas")) {
-                return "Los astros me permiten hablar sobre estos temas: Presupuesto (y métodos como 50/30/20, Kakebo, FIRE, Minimalismo), Ahorro (formal e informal), Inversión, Deuda, Riesgo, Metas, Buró de Crédito, CAT y GAT, Interés Compuesto, Fórmulas (Pago, VF, VP) y Seguridad contra Fraudes.";
-            }
-            if (pregunta.includes("kakebo")) {
-                return "Kakebo es un estilo de vida cuya filosofía radica en hacerse consciente de todos los gastos que se realizan, preguntarse si eran necesarios, y qué se puede hacer para disminuirlos y lograr un ahorro de al menos el 30% o 35%. Es el arte de la introspección financiera.";
-            }
-            if (pregunta.includes("minimalismo")) {
-                return "El minimalismo financiero es un estilo de vida cuya filosofía es gastar únicamente en lo estrictamente indispensable. El objetivo es navegar ligero de cargas, liberando la mayor cantidad de recursos para dirigirlos al ahorro y la inversión.";
-            }
-            if (pregunta.includes("fire")) {
-                return "FIRE (Financial Independence, Retire Early) es una travesía intensa. Se basa en 'poseer todo, usar nada': adquirir activos que generen ingresos (rentar una casa en Airbnb, un coche como Uber) para maximizar el ahorro y la inversión, buscando retirarse joven, entre los 38 y 45 años.";
-            }
-            if (pregunta.includes("presupuesto")) {
-                return "Un presupuesto es el mapa de tu odisea financiera. Te ayuda a decirle a tu dinero a dónde ir. La regla 50/30/20 es un gran punto de partida: 50% para necesidades, 30% para deseos y 20% para ahorro e inversión.";
-            }
-            if (pregunta.includes("ahorro") && pregunta.includes("formal")) {
-                return "El ahorro formal (en bancos, SOFIPOs) es como guardar tu tesoro en la bóveda de los dioses, protegido por el IPAB. El ahorro informal (debajo del colchón) es dejarlo en una playa desierta, a merced de piratas y tormentas. ¡Elige siempre un puerto seguro!";
-            }
-            if (pregunta.includes("ahorrar") || pregunta.includes("ahorro")) {
-                return "Ahorrar es guardar un tesoro en un cofre seguro para tus metas cercanas. El primer paso es crear tu 'Fondo para Tormentas' (un fondo de emergencia) con el equivalente a 3 meses de tus gastos fijos. ¡Págate a ti primero siempre!";
-            }
-            if (pregunta.includes("invertir") || pregunta.includes("inversión")) {
-                return "Invertir es plantar una semilla que crecerá con el tiempo. Para empezar, los CETES son como un puerto seguro, de bajo riesgo. Plataformas como GBM+ te permiten comprar pequeñas partes de grandes empresas. Recuerda: a mayor riesgo, mayor potencial de ganancia (y de pérdida).";
-            }
-            if (pregunta.includes("valor futuro") || pregunta.includes("vf") || pregunta.includes("valor presente") || pregunta.includes("vp")) {
-                return "El Valor Futuro (VF) es un catalejo mágico que te muestra cuánto valdrá tu tesoro en el futuro. El Valor Presente (VP) te dice cuánto tesoro necesitas hoy para una gran expedición futura. En una hoja de cálculo, usa =VF(tasa, periodos, -pago_mensual) para ver tu riqueza crecer, y =VP(tasa, periodos, 0, -valor_futuro_deseado) para saber cuánto necesitas hoy.";
-            }
-            if (pregunta.includes("matemáticas") || pregunta.includes("fórmula") || pregunta.includes("interes simple") || pregunta.includes("pago")) {
-                return "Las matemáticas son el lenguaje de los astros que guía a los navegantes. Para calcular el pago mensual de un préstamo en una hoja de cálculo, usa la función =PAGO(tasa_interes_mensual, numero_de_pagos, valor_prestamo). Ejemplo: para un préstamo de $10,000 a 12 meses con 20% de interés anual, la fórmula sería =PAGO(20%/12, 12, 10000).";
-            }
-            if (pregunta.includes("deuda")) {
-                return "Existen dos tipos de deuda: la 'Deuda Sirena' (la que te hunde, como la de lujos innecesarios) y la 'Deuda Herramienta' (la que te ayuda a construir, como un crédito para una computadora para trabajar). ¡Evita el canto de las sirenas!";
-            }
-            if (pregunta.includes("cetes")) {
-                return "Los CETES (Certificados de la Tesorería) son la forma más segura de invertir en México. Es como prestarle dinero al gobierno y él te lo devuelve con un pequeño interés. Puedes empezar desde $100 en cetesdirecto.com.";
-            }
-            if (pregunta.includes("riesgo")) {
-                return "El riesgo en la inversión es la posibilidad de que el valor de tu dinero suba o baje. Hay perfiles de navegante: Conservador (prefiere puertos seguros como los CETES), Moderado (se aventura un poco más) y Arriesgado (busca tesoros en aguas profundas como la bolsa). ¿Qué tipo de navegante eres tú?";
-            }
-            if (pregunta.includes("buró") || pregunta.includes("buro") || pregunta.includes("historial crediticio")) {
-                return "El Buró de Crédito es como el registro en la bitácora del capitán de todos tus viajes financieros. Un buen historial (un 'Mi Score' alto) te abre las puertas a puertos amigos (mejores créditos), mientras que un mal historial puede dejarte a la deriva. ¡Paga a tiempo y tu reputación de navegante será legendaria!";
-            }
-            if (pregunta.includes("cat") || pregunta.includes("gat")) {
-                return "El CAT (Costo Anual Total) es el precio real de un crédito, ¡el monstruo completo con todos sus tentáculos (intereses, comisiones)! El GAT (Ganancia Anual Total) es el rendimiento real de una inversión después de la inflación. Busca un CAT bajo al pedir prestado y un GAT alto al invertir.";
-            }
-            if (pregunta.includes("interés compuesto") || pregunta.includes("interes compuesto")) {
-                return "El interés compuesto es la magia más poderosa de los mares financieros. Es el 'efecto bola de nieve': tus ganancias generan más ganancias. Odiseo tardó 10 años en volver a Ítaca; con el interés compuesto, tu riqueza puede crecer exponencialmente con el tiempo. ¡La paciencia es tu mejor aliada!";
-            }
-            if (pregunta.includes("fraude") || pregunta.includes("estafa") || pregunta.includes("seguridad")) {
-                return "¡Alerta, navegante! En los mares digitales hay 'cantos de sirena' (phishing, smishing) que buscan robar tu tesoro. Nunca compartas tus contraseñas o códigos. Si una oferta parece demasiado buena para ser verdad, es una trampa. Navega con cautela y desconfianza.";
-            }
-            if (pregunta.includes("meta") || pregunta.includes("objetivo")) {
-                return "Toda odisea necesita un destino. Tus metas son tu Ítaca. Divídelas en: Corto Plazo (tesoros que quieres en menos de un año), Mediano Plazo (islas por conquistar en 1-5 años) y Largo Plazo (tu gran legado, como el retiro). Un mapa claro hace la travesía más fácil.";
-            }
-            if (pregunta.includes("fintech")) {
-                return "Las Fintech son como nuevas y ágiles embarcaciones en el sistema financiero. Ofrecen servicios (créditos, cuentas) de forma 100% digital, a menudo con menos requisitos que los grandes navíos (bancos tradicionales). Son excelentes para iniciar tu travesía, pero siempre verifica que estén reguladas.";
-            }
-            if (pregunta.includes("gracias")) {
-                return "¡De nada! Que los vientos soplen a tu favor en tu travesía financiera. Vuelve cuando necesites guía.";
-            }
-            
-            // Respuesta por defecto
-            return "Tu pregunta es intrigante, pero su respuesta aún está oculta para mí. Escribe 'ayuda' para ver la lista de temas sobre los que puedo aconsejarte.";
         }
         
         // --- Funciones para manejar la interfaz del chat ---
         function addMessage(text, sender) {
+            const messageId = `msg-${Date.now()}`;
             const messageElement = document.createElement('div');
-            messageElement.className = `p-3 rounded-lg max-w-lg animate-fade-in-up ${sender === 'user' ? 'user-message self-end text-right' : 'oraculo-message self-start'}`;
-            messageElement.textContent = text;
+            messageElement.id = messageId;
+            
+            if (sender === 'typing') {
+                messageElement.className = 'oraculo-message self-start p-3 rounded-lg max-w-lg typing-indicator';
+                messageElement.innerHTML = '<span>●</span><span>●</span><span>●</span>';
+            } else {
+                messageElement.className = `p-3 rounded-lg max-w-lg animate-fade-in-up ${sender === 'user' ? 'user-message self-end text-right' : 'oraculo-message self-start'}`;
+                messageElement.textContent = text;
+            }
+            
             chatBox.appendChild(messageElement);
-            chatBox.scrollTop = chatBox.scrollHeight; // Auto-scroll
+            chatBox.scrollTop = chatBox.scrollHeight;
+            return messageId;
         }
 
-        function handleSend() {
+        async function handleSend() {
             const userText = userInput.value;
-            if (!userText) return;
+            if (!userText.trim()) return;
 
             addMessage(userText, 'user');
             userInput.value = '';
+            sendButton.disabled = true;
 
-            // Simula que el Oráculo está "pensando"
-            setTimeout(() => {
-                const oraculoText = getOraculoResponse(userText);
-                if (oraculoText) {
-                    addMessage(oraculoText, 'oraculo');
-                }
-            }, 800);
+            const typingId = addMessage('', 'typing');
+
+            const oraculoText = await getOraculoAIResponse(userText);
             
-            // Animar el astrolabio
+            const typingElement = document.getElementById(typingId);
+            if(typingElement) {
+                chatBox.removeChild(typingElement);
+            }
+
+            addMessage(oraculoText, 'oraculo');
+            sendButton.disabled = false;
+            
             astrolabio.style.transform = `rotate(${Math.random() * 360}deg)`;
         }
 
@@ -218,10 +216,9 @@
             }
         });
 
-        // Mensaje inicial del Oráculo
         window.addEventListener('load', () => {
             setTimeout(() => {
-                addMessage("¡Bienvenido, navegante! Soy el Oráculo de Odisea. Hazme una pregunta sobre tu travesía financiera o escribe 'ayuda' para ver los temas que domino.", 'oraculo');
+                addMessage("¡Bienvenido, navegante! Soy el Oráculo de Odisea. Hazme una pregunta sobre tu travesía financiera.", 'oraculo');
             }, 500);
         });
     </script>
